@@ -1,0 +1,89 @@
+body {        
+font-size: 50px ;    
+font:Sans-Serif;
+background: #eee;
+}
+#container {
+position: relative;
+padding: 10%;    
+}
+.letterW {
+    margin: 0 auto;
+    position: relative;
+    top: -105px;
+    left: 210px;
+}
+#keyboard { 
+position: fixed;
+margin: 0 auto;
+padding: 15% 0%;    
+list-style: none;
+height: 30%;
+}
+    #keyboard li {
+    position:relative; 
+    float: left;
+    margin: 0 5px 5px 0;
+    width: 100px;
+    height: 100px;
+    line-height: 90px;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #f9f9f9;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    }
+        #keyboard li:hover {
+        border-color: #cc0000;
+        cursor: pointer;
+        }
+        #keyboard li:active {
+        background: #cc0000;    
+        cursor: pointer;
+        color: white;    
+        }
+.displayer {
+    padding: 5px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 30px;
+    position: relative;
+    top: 10%;
+    border: 3px solid #cc0000;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    background-color:#ffffff ;
+}
+.speed{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 30px;
+}
+#adidas{
+    position: absolute;
+    top: 0px;
+    margin: 0 50px;
+    padding: 0;
+    list-style: none;
+}
+    #adidas li{
+        
+        background: #cc0000;
+        height:1000px;
+        padding: 3px;
+        margin: 0px 2px;
+        float: left;
+}
+.tm{
+    color: #cc0000;
+    font-family: 'Permanent Marker', cursive;
+    position: relative;
+    text-align: center;
+    padding: 5%;
+}
+.dad{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+    left: 10%;
+    width: 50%;
+}

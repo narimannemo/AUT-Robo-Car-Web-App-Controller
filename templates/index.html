@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Robot Navigation</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="../static/main.css">
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Caveat|Permanent+Marker" rel="stylesheet">
+</head>
+<body>
+<div class="row">
+      <div class="col-lg-4">    
+    <ul id="adidas">
+        <li></li>
+        <li></li>
+        <li></li>        
+    </ul>
+    </div>  
+    <div class="col-lg-4">
+        <h1 class="tm">FORZA TEAMMELLI!</h1>
+    </div>    
+<div class="col-lg-4">
+    </div>
+    </div>
+<div class="row">
+  <div class="col-lg-3">  
+    </div>    
+    <div class="col-lg-3" align="center">
+    <h3 id="lm" class="speed">LEFT MOTOR SPEED</h3>
+        <canvas width="380" height="250" id="foo"></canvas>
+        <h3 id="lm" class="speed"></h3>    
+    </div>
+  <div class="col-lg-3 " align="center">
+    <h3 id="lm" class="speed">RIGHT MOTOR SPEED</h3>
+      <canvas width="380" height="250" id="boo"></canvas>
+      <h3 id="rm" class="text-center"></h3>
+    </div>
+
+</div>    
+<div class="row">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+        <form>
+        <ul id="keyboard">
+            <li id="w" class="letterW">W</li>
+            <li id="a" class="letter">A</li>
+            <li id="s" class="letter">S</li>
+            <li id="d" class="letter">D</li>
+    </ul>
+    </form> 
+    </div>
+    <div class="col-lg-4"></div>
+   
+</div>    
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript" src="/keyboard.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+	document.getElementById("w").onclick = function() {
+	var ch=document.getElementById("w").innerHTML.toLowerCase();
+	$.post("http://127.0.0.1:5000",ch, function(response){
+	var lines = response.split('\n');
+	$('#lm').html(lines[0]);
+	$('#rm').html(lines[1]);
+	});
+ event.preventDefault();
+}
+	document.getElementById("a").onclick = function() {
+        var ch=document.getElementById("a").innerHTML.toLowerCase();
+	$.post("http://127.0.0.1:5000",ch, function(response){
+	var lines = response.split('\n');
+	$('#lm').html(lines[0]);
+	$('#rm').html(lines[1]);
+	});
+ event.preventDefault();
+}
+	document.getElementById("s").onclick = function() {
+	var ch=document.getElementById("s").innerHTML.toLowerCase();
+	$.post("http://127.0.0.1:5000",ch, function(response){
+	var lines = response.split('\n');
+	$('#lm').html(lines[0]);
+	$('#rm').html(lines[1]);
+	});
+ event.preventDefault();
+}
+	document.getElementById("d").onclick = function() {
+	var ch=document.getElementById("d").innerHTML.toLowerCase();
+	$.post("http://127.0.0.1:5000",ch, function(response){
+	var lines = response.split('\n');
+	$('#lm').html(lines[0]);
+	$('#rm').html(lines[1]);
+	});
+ event.preventDefault();
+}    
+    };
+</script>
+<!--
+//function uniKeyCode(event) {
+//    var key = event.keyCode;
+//    if (key === 37|| key === 38 ||key === 39 ||key === 40){
+//    document.getElementById("w").innerHTML ="&uarr;" ;
+//    document.getElementById("a").innerHTML ="&larr;" ;
+//    document.getElementById("s").innerHTML ="&darr;" ;
+//    document.getElementById("d").innerHTML ="&rarr;" ;  
+//    }
+//}
+-->
+<script src="http://bernii.github.io/gauge.js/dist/gauge.js"></script>    
+<script type="text/javascript" >
+var opts = {
+    
+  angle: -0.2, // The span of the gauge arc
+  lineWidth: 0.2, // The line thickness
+  radiusScale: 1, // Relative radius
+  pointer: {
+    length: 0.6, // // Relative to gauge radius
+    strokeWidth: 0.05, // The thickness
+    color: '#000000' // Fill color
+  },
+  limitMax: false,     // If false, max value increases automatically if value > maxValue
+  limitMin: false,     // If true, the min value of the gauge will be fixed
+  generateGradient: true,
+  highDpiSupport: true,     // High resolution support
+staticZones: [ 
+   {strokeStyle: "#cc0000", min: -200, max: -180},
+   {strokeStyle: "#FFFFFF", min: -180, max: 180},
+   {strokeStyle: "#cb7d00", min: 155, max: 162},
+   {strokeStyle: "#cb7d00", min: -162, max: -155},
+   {strokeStyle: "#cb3700", min: -178, max: -165},
+//   {strokeStyle: "#000000", min: -101, max: -100},    
+//   {strokeStyle: "#000000", min: 100, max: 101 },
+//   {strokeStyle: "#000000", min: -151, max: -150},    
+//   {strokeStyle: "#000000", min: 150, max: 151 },
+//   {strokeStyle: "#000000", min: -51, max: -50},    
+//   {strokeStyle: "#000000", min: 50, max: 51 },     
+   {strokeStyle: "#cb3700", min: 165, max: 178},    
+   {strokeStyle: "#cc0000", min: 180, max: 200}  // Red
+],
+staticLabels: {
+  font: "20px 'IBM Plex Mono', monospace",  // Specifies font
+  labels: [-200,-100,-50,50,100,200],  // Print labels at these values
+  color: "#000000",  // Optional: Label text color
+  fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+}
+};   
+var lm=document.getElementById("lm").innerHTML;    
+var target = document.getElementById('foo');
+var gauge = new Gauge(target).setOptions(opts);
+gauge.maxValue = 200;
+gauge.setMinValue(-200);
+gauge.animationSpeed = 32;
+gauge.set(lm);
+
+var rm=document.getElementById("rm").innerHTML;   
+var target = document.getElementById('boo');
+var gaugeR = new Gauge(target).setOptions(opts);
+gaugeR.maxValue = 200;
+gaugeR.setMinValue(-200);
+gaugeR.animationSpeed = 32;
+gaugeR.set(rm); 
+    </script>    
+</body>
+</html>    
+    
+</script>    
+</body>
+</html>
