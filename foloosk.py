@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, Response
 import tty , termios,sys, time, serial,numpy,threading,webbrowser
 import random, json,os,sys
-#import last
+from flask_cors import CORS
+from werkzeug import *
  
 class robot:
     JOYSTICK_DELAY = .05
@@ -11,10 +12,11 @@ class robot:
     MOTOR_SPEED_MINISTEP = 10
 
     portfd=0
+    espPort = "";
 
     motorLeftError = [0,0,0]
     motorRightError = [0,0,0]
-    Ts = 1
+    Ts = .1
     K_p = .127
     K_i = 1.27
     K_d = .00317
@@ -65,19 +67,18 @@ class robotFunction:
         print(bcommand)
         try:
             robot.portfd.write(bcommand)
+            close = False     
         except:
-            #print("Error: Can't write on serial")
-            close = False
-        #time.sleep(1)
+            print("Error: Can't write on serial")
+            close = True
         data = [0,0,0,0,0,0,0,0,0]
         for i in range(0,9):
             try:
                 bufptr = robot.portfd.readline()
             except:
-                #print("Error: Can't read from serial")
-                a=1
-            close = True
-            #print(bufptr)
+                print("Error: Can't read from serial")
+                close = True
+                break
             if  not close:
                 if i<8:
                     data[i] = int(bufptr)
@@ -108,7 +109,7 @@ class robotFunction:
        #self.robotToString(robot)
        return ch  
     def joysticMode(self,robot,ch):
-        #ch = str(ch[2])
+        ch = str(ch[0])
         left = robot.motorSpeedLeft_d
         right = robot.motorSpeedRight_d
         if ch == 'w':
@@ -218,8 +219,8 @@ def PID(robot,robotFunction):
         start = time.time()
         # must be deleted to PID works
         # simulated error since encoder was not available 
-        robot.motorShaftLeft = robot.motorSpeedLeft_d - .2*robot.motorShaftLeft
-        robot.motorShaftRight = robot.motorSpeedRight_d - .2*robot.motorShaftRight
+        robot.motorShaftLeft = robot.motorSpeedLeft_d - .6*robot.motorShaftLeft
+        robot.motorShaftRight = robot.motorSpeedRight_d - .4*robot.motorShaftRight
         #reading Input
         errRight = robot.motorLeftError
         errLeft = robot.motorRightError
@@ -240,7 +241,7 @@ def PID(robot,robotFunction):
         robot.motorLeftError = errRight
         robot.motorRightError = errLeft
         #print("left Error is: "+str(errLeft[2])+"\n"\
-         #     "Right Error is: "+str(errRight[2])+"\n")
+        #      "Right Error is: "+str(errRight[2])+"\n")
         end = time.time()
         time.sleep(robot.Ts-end+start)
         robotFunction.updateRobot(robot)
@@ -250,9 +251,9 @@ def main(method,robot,robotFunction,speedController):
     if method ==1:
         while True:
              ch = robotFunction.getchar()
-             print(ch)
+             #print(ch)
              robotFunction.joysticMode(robot,ch)
-             print("done")
+             #print("done")
     elif method==2:
         while True:
             try:
@@ -273,71 +274,93 @@ def main(method,robot,robotFunction,speedController):
         else:
             speedController.speed_changer(robot,robotFunction,0,0)
 
-       
-def method():
+      
+def method(robot):
+    robotPort = input("Enter Robot port: ")
+    espPort = input("Enter ESP Port: ")
+    robot.espPort = espPort
     try:
-        ser=serial.Serial('/dev/ttyUSB0')
+        robotPort = "/dev/ttyUSB%s"%robotPort
+        ser=serial.Serial(robotPort)
         ser.baudrate=38400
         robot.portfd=ser
     except:
-        try:
-            time.sleep(.1)
-            ser=serial.Serial('/dev/ttyUSB1')
-            ser.baudrate=38400
-            robot.portfd=ser
-        except:
-                print("Error: Serial port not found")
-                #exit()
+#        try:
+ #           #time.sleep(.1)
+  #          ser=serial.Serial('/dev/ttyUSB0')
+   #         ser.baudrate=38400
+    #        robot.portfd=ser
+     #   except:
+         print("Error: Serial port not found")
+        #exit()
     while True:
-        print("Select how to control robot: \n1-Using keyboard\n2-Using speed controller\n3-Using Web")
+        print("Select how to control robot: \n1-Using keyboard\n2-Using speed controller\n3-Using Web\n4-Useing Wemos D1 (note that you need internet connection!!)")
         try:
             method = int(input())
-            if method == 1 or method == 2 or method == 3:
+            if method == 1 or method == 2 or method == 3 or method == 4:
                 if method == 3:
-                    webbrowser.open('/home/pi/Desktop/Robot/templates/index.html', new=2,autoraise = True)
+                    webbrowser.open('/home/pi/Desktop/robot/templates/index.html', new=2,autoraise = True)
                 return method
                 break
                 #print("Here you must select 3 :)")
         except:
-            print("Here you must select 3 :)")
+            print("You must select 1, 2, 3,or 4 :)")
+        
+def esp(robotFunction,espPort):
+    espPort = "/dev/ttyUSB%s"%espPort
+    espser =  serial.Serial(espPort,baudrate = 115200)
+    while True:
+        try:
+            j = espser.readline().decode('utf-8')
+            print(j)
+        except:
+            j='08'
+        try:
+            v = j[1]
+        except:
+            v='8'
+        if j[0] == '1' and (v=='9' or v=='7'):
+            print('ip address is: \n')
+            print(j)
+            webbrowser.open("http://%s:80"%j, new=2,autoraise = True)
+            print("get the IP address it will go fast...")
+        #if ("/w" in j) or j == 'a\n' or j == 's\n' or j == 'd\n' :
+        if ('w\r' in j) or ('a\r' in j) or ('s\r' in j) or ('d\r' in j) :
+            robotFunction.joysticMode(robot,j)
+            com = r"%dt%dt"%(robot.motorSpeedLeft_d,robot.motorSpeedRight_d)
+            print(com.encode())
+            espser.write(com.encode())
 
 robot = robot()
 robotFunction = robotFunction()
 SpeedController = SpeedController()
-meth = method()
+lock = threading.Lock()
+meth = method(robot)
 #print(meth)
 if meth == 2 or meth == 1:
     t_main = threading.Thread(target = main , args = (meth,robot,robotFunction,SpeedController,))
 t_PID = threading.Thread(target = PID, args = (robot,robotFunction,) )
-t_PID.start()
+if not meth == 4:
+    t_PID.start()
 if meth == 2 or meth == 1:
     t_main.start()
-i=0
+if meth == 4:
+    t_esp = threading.Thread(target = esp,args = (robotFunction,robot.espPort,))
+    t_esp.start()
+    time.sleep(5)
+    t_PID.start()
 app = Flask(__name__)
-if meth == 3:
-    
+CORS(app)
+if meth == 3: 
     @app.route('/', methods=['POST','GET'])
     def output():
         ch = request.form.to_dict().keys()
-        if ch == ['w']:
-            x='w'
-        elif ch == ['s']:
-            x = 's'
-        elif ch == ['a']:
-            x = 'a'
-        elif ch == ['d']:
-            x = 'd'
-        elif ch == ['t']:
-            x = 't'
-        else:
-            x='h'
-        robotFunction.joysticMode(robot,x)
-
-            #return render_template('index.html',rightmotorspeed= robot.motorSpeedRight_d,\
-             #                      leftmotorspeed=robot.motorSpeedLeft_d)
-        rightmotorspeed = robot.motorSpeedRight_d
-        leftmotorspeed=robot.motorSpeedLeft_d
-        a = [rightmotorspeed,leftmotorspeed]
-        return "%s\n%s\n"%(a[0],a[1])
+        ch=list(ch)[0]
+        robotFunction.joysticMode(robot,ch)
+        a = [robot.motorSpeedRight_d,robot.motorSpeedLeft_d]
+        return json.dumps({'rm':a[0],'lm':a[1]})
 if __name__ == '__main__':
-    app.run() 
+    app.run()
+
+
+    
