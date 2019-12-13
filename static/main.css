@@ -2,6 +2,12 @@ body {
 font-size: 50px ;    
 font:Sans-Serif;
 background: #eee;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
 }
 #container {
 position: relative;
@@ -37,7 +43,7 @@ height: 30%;
         border-color: #cc0000;
         cursor: pointer;
         }
-        #keyboard li:active {
+        #keyboard li:active , .hovi{
         background: #cc0000;    
         cursor: pointer;
         color: white;    
